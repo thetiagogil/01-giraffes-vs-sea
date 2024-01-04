@@ -22,7 +22,7 @@ class Game {
       1,
       this.enemyStartPosition,
       460,
-      "./img/dolphin.gif",
+      "./assets/gif/dolphin.gif",
       true,
       "dolphin"
     );
@@ -128,7 +128,7 @@ class Game {
         1,
         this.enemyStartPosition,
         430,
-        "./img/shark.gif",
+        "./assets/gif/shark.gif",
         true,
         "shark"
       );
@@ -152,7 +152,7 @@ class Game {
         1,
         this.enemyStartPosition,
         490,
-        "./img/whale.gif",
+        "./assets/gif/whale.gif",
         true,
         "whale"
       );
@@ -172,7 +172,7 @@ class Game {
         2,
         this.enemyStartPosition - 150,
         450,
-        "./img/kraken.gif",
+        "./assets/gif/kraken.gif",
         true,
         "kraken"
       );
