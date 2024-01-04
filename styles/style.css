@@ -1,0 +1,264 @@
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: "Calibri Light";
+}
+
+/* THIS BOX DISPLAYS THE CONTENT OF ALL SCREENS */
+.box {
+  text-align: center;
+  padding: 20px;
+  margin: 50px auto;
+  width: 1500px;
+  height: 600px;
+  background-image: url(../img/ocean.png);
+  background-size: cover;
+  animation: slide 600s linear infinite;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+/* BACKGROUND IMG GO BRRR */
+@keyframes slide {
+  0% {
+    background-position: -100000px 0;
+  }
+
+  95% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* DISPLAY NONE EVERY OTHER SCREEN THAT'S NO THE MAIN MENU */
+#instructions,
+#credits,
+#game-content,
+#game-lose,
+#game-win,
+#game-win-but {
+  display: none;
+}
+
+#game-content {
+  position: relative;
+}
+
+/* HEADINGS CHANGES */
+.box h1 {
+  font-family: "Lucida Handwriting";
+}
+
+#main-menu p {
+  margin-top: 30px;
+  font-size: 27px;
+}
+
+/* TEXT BOXES INSIDE THE INSTRUCTIONS AND THE CREDITS */
+.text-box {
+  background: #ffffff3a;
+  width: 900px;
+  padding: 10px;
+  border-radius: 30px;
+  margin: 0 auto;
+  font-size: 18.5px;
+}
+
+.text-box h3 {
+  margin: 7px;
+}
+
+.text-box p {
+  margin: 0px 7px 7px 7px;
+}
+
+#instructions p {
+  text-align: left;
+  padding-left: 30px;
+}
+
+#credits .text-box {
+  width: 300px;
+}
+
+/* TEXT BOXES INSIDE THE GAME */
+.game-box {
+  background: #ffffff3a;
+  width: 300px;
+  padding: 5px;
+  border-radius: 20px;
+  margin: 0 auto;
+  font-size: 17px;
+}
+
+.game-box p {
+  margin: 5px;
+}
+
+.hp-box {
+  width: 300px;
+  padding: 5px;
+  margin: 0 auto;
+  font-size: 17px;
+  position: absolute;
+  text-align: left;
+}
+
+#user-answer {
+  color: #1b5e8b;
+  font-size: 15px;
+}
+
+#buttons-box-from-game {
+  width: 150px;
+  padding: 5px;
+  margin: 0 auto;
+  font-size: 17px;
+  text-align: right;
+  position: absolute;
+  right: 10px;
+  top: 20px;
+}
+
+#main-screen-button-from-game {
+  font-size: 15px;
+  color: white;
+  background: #1b5e8b;
+  margin: 7px;
+  padding: 5px;
+  width: 110px;
+  letter-spacing: 1px;
+  border-radius: 50px 0px 0px 50px;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+#buttons-box-from-game button:hover {
+  background: #46464685;
+}
+
+/* HIDE UP AND DOWN BUTTONS FROM INPUTS */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* BUTTONS DISPLAY */
+.buttons-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 240px;
+}
+
+button {
+  font-size: 15px;
+  color: white;
+  background: #1b5e8b;
+  margin: 7px;
+  padding: 10px;
+  width: 150px;
+  letter-spacing: 1px;
+  border-radius: 50px 5px;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background: #46464685;
+}
+
+/* OTHER STUFF */
+.hp {
+  font-weight: bold;
+  color: brown;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.signature {
+  font-style: italic;
+  font-size: 16px;
+  color: rgb(209, 209, 209);
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+}
+
+/* AUDIO */
+#audio-controls {
+  width: 150px;
+  padding: 5px;
+  margin: 0 auto;
+  font-size: 17px;
+  text-align: right;
+  position: absolute;
+  right: 10px;
+  top: 20px;
+}
+
+#play-pause-button,
+#volume-control {
+  font-size: 15px;
+  color: white;
+  background: #1b5e8b;
+  margin: 7px;
+  padding: 5px;
+  width: 110px;
+  letter-spacing: 1px;
+  border-radius: 50px 0px 0px 50px;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+#audio-controls button:hover {
+  background: #46464685;
+}
+
+/* EASTER EGG */
+#marvel-char {
+  width: 100px;
+  height: 70px;
+  position: absolute;
+  top: 70%;
+  right: -10%;
+  animation: moveImage 10s linear 15s forwards;
+  z-index: 1;
+  visibility: hidden;
+  opacity: 0;
+}
+
+@keyframes moveImage {
+  0% {
+    right: 0%;
+    visibility: hidden;
+    opacity: 0;
+  }
+  10% {
+    right: 10%;
+    visibility: visible;
+    opacity: 1;
+  }
+  90% {
+    right: 85%;
+    visibility: visible;
+    opacity: 1;
+  }
+  100% {
+    right: 92%;
+    visibility: hidden;
+    opacity: 0;
+  }
+}

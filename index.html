@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="./styles/style.css" />
+  <title>Giraffes vs Sea</title>
+</head>
+
+<body>
+  <!--AUDIO-->
+  <audio id="background-music" loop>
+    <source src="./music/one-piece.mp3" type="audio/mpeg">
+  </audio>
+
+  <main>
+    
+    <!--#1 MAIN MENU-->
+    <div id="main-menu" class="box">
+      <h1>GIRAFES vs SEA</h1>
+
+      <div id="audio-controls">
+        <button id="play-pause-button">Play Music</button>
+        <input type="range" id="volume-control" min="0" max="1" step="0.01">
+      </div>
+
+      <p>
+        Help the Going Giraffes crew and its captain defeat the evils of the
+        sea with math!
+      </p>
+
+      <section class="buttons-box">
+        <button id="play-button">Play</button>
+        <button class="instructions-button">Instructions</button>
+        <button class="credits-button">Credits</button>
+      </section>
+
+      <img id="marvel-char" src="./img/marvel.png" alt="Silver Surfer"></img>
+      <footer class="signature">Game by: Tiago Gil, 2023</footer>
+    </div>
+
+    <!--#2 INSTRUCTIONS SCREEN-->
+    <div id="instructions" class="box">
+
+      <h1>GIRAFES vs SEA</h1>
+
+      <section class="text-box">
+        <h3>INSTRUCTIONS</h3>
+        <p>
+          Fill the "value" input with the correct result to drive the deadly animals away!<br>
+
+          You can answer the result to any type of animal that appears on your screen!<br>
+
+          You will start with <span class="hp">100</span> hit points (HP) and if any animal reaches your ship, you'll
+          lose HP!<br>
+
+          If your ship's HP reaches 0, the ship will drown and you'll lose...<br>
+
+          Each animal has its own strength and speed values that will be determined by how hard the math problem is!<br>
+
+          Dumb animals are fast but deal a low amount of damage and are easily scared away with simple math,<br>
+          while intelligent ones are slower but deal a lot more damage and are
+          not that easily scared!<br>
+        </p>
+      </section>
+
+      <section class="buttons-box">
+        <button class="main-screen-button">Main Menu</button>
+      </section>
+      <footer class="signature">Game by: Tiago Gil, 2023</footer>
+    </div>
+
+    <!--#3 CREDITS SCREEN-->
+    <div id="credits" class="box">
+      <h1>GIRAFES vs SEA</h1>
+
+      <section class="text-box">
+        <h3>CREDITS</h3>
+        <p>
+          This is my first javascript game!<br>
+          Thank you for playing! ❤️
+        </p>
+      </section>
+
+      <section class="buttons-box">
+        <button class="main-screen-button">Main Menu</button>
+      </section>
+      <footer class="signature">Game by: Tiago Gil, 2023</footer>
+    </div>
+
+    <!--#4 MAIN GAME-->
+    <div id="game-content" class="box">
+
+      <section id="buttons-box-from-game">
+        <button id="main-screen-button-from-game">Main Menu</button>
+      </section>
+
+      <p class="hp-box">GOING GIRAFFES HP: <span id="hp" class="hp">100</span> ❤️</p>
+
+      <section class="game-box">
+        <p>Type the result here</p>
+        <input id="user-answer" type="number" placeholder="value"></input>
+
+        <p><span id="dolphin-problem"></span></p>
+        <p><span id="shark-problem"></span></p>
+        <p><span id="whale-problem"></span></p>
+        <p><span id="kraken-problem"></span></p>
+      </section>
+    </div>
+
+    <!--#5 IF YOU LOST-->
+    <div id="game-lose" class="box">
+      <h2>The ship as drowned...</h2>
+
+      <section class="buttons-box">
+        <button class="restart-button">Main Menu</button>
+      </section>
+    </div>
+
+    <!--#6 IF YOU WON-->
+    <div id="game-win" class="box">
+      <h2>The Going Girrafes crew is safe and the ship didn't receive any damage!</h2>
+
+      <section class="buttons-box">
+        <button class="restart-button">Main Menu</button>
+      </section>
+    </div>
+
+    <!--#7 IF YOU WON BUT LOST HP-->
+    <div id="game-win-but" class="box">
+      <h2>The Going Girrafes crew is safe but the ship is going to need a lot of reparations!</h2>
+
+      <section class="buttons-box">
+        <button class="restart-button">Main Menu</button>
+      </section>
+    </div>
+  </main>
+
+  <script type="text/javascript" src="./src/player.js"></script>
+  <script type="text/javascript" src="./src/enemy.js"></script>
+  <script type="text/javascript" src="./src/game.js"></script>
+  <script type="text/javascript" src="./src/script.js"></script>
+</body>
+
+</html>
