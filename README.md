@@ -1,6 +1,6 @@
 # GIRAFFES VS SEA
 
-[Click here to play the game!](https://thetiagogil.github.io/giraffes-vs-sea/)
+[Click here to play the game!](https://giraffes-vs-sea.netlify.app/)
 
 ## Description
 Giraffes vs Sea is a game where the players need to protect the Going Giraffes ship from various types of animals from the sea using math problemas. The ship starts with 100 hit points and loses some of them when an enemy reaches the ship. If the ship loses all of its hit points, the player loses. The player wins when all of the enemies are defeated.
