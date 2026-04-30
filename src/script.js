@@ -1,94 +1,104 @@
-window.addEventListener("load", () => {
-  const mainMenu = document.getElementById("main-menu");
+window.addEventListener("DOMContentLoaded", () => {
+  const screens = new Map(
+    ["main-menu", "instructions", "credits", "game-content", "game-lose", "game-win", "game-win-but"].map((id) => [
+      id,
+      document.getElementById(id),
+    ])
+  );
 
-  // INSTRUCTIONS BUTTON
-  const instructions = document.getElementById("instructions");
-  const instructionsButton = document.querySelectorAll(".instructions-button");
-
-  // CREDITS BUTTON
-  const credits = document.getElementById("credits");
-  const creditsButton = document.querySelectorAll(".credits-button");
-
-  // MAIN SCREEN BUTTON
-  const mainScreenButton = document.querySelectorAll(".main-screen-button");
-
-  const mainScreenButtonFromGame = document.getElementById("main-screen-button-from-game");
-
-  // START THE GAME PART
   const playButton = document.getElementById("play-button");
-  const restartButton = document.querySelectorAll(".restart-button");
-  const userInput = document.getElementById("user-answer");
-  let game;
-
-  function startGame() {
-    console.log("Start Game");
-    game = new Game();
-    game.start();
-  }
-
-  // BUTTONS
-  instructionsButton.forEach((button) => {
-    button.addEventListener("click", function () {
-      mainMenu.style.display = "none";
-      instructions.style.display = "block";
-    });
-  });
-
-  creditsButton.forEach((button) => {
-    button.addEventListener("click", function () {
-      mainMenu.style.display = "none";
-      credits.style.display = "block";
-    });
-  });
-
-  mainScreenButton.forEach((button) => {
-    button.addEventListener("click", function () {
-      instructions.style.display = "none";
-      credits.style.display = "none";
-      mainMenu.style.display = "block";
-    });
-  });
-
-  playButton.addEventListener("click", function () {
-    startGame();
-  });
-
-  mainScreenButtonFromGame.addEventListener("click", function () {
-    location.reload();
-  });
-
-  restartButton.forEach((button) => {
-    button.addEventListener("click", function () {
-      location.reload();
-    });
-  });
-
-  // THIS DOESN'T ACTUALLY DO WHAT I FIRST INTENDED IT TO DO BUT I LEFT IT BECAUSE IT LOOKS SATISFYING IN-GAME TO PRESS ENTER
-  userInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      const userAnswer = parseFloat(userInput.value);
-      if (!isNaN(userAnswer)) {
-      }
-      userInput.value = "";
-    }
-  });
-
-  // AUDIO
+  const instructionsButtons = document.querySelectorAll(".instructions-button");
+  const creditsButtons = document.querySelectorAll(".credits-button");
+  const mainScreenButtons = document.querySelectorAll(".main-screen-button");
+  const inGameMainMenuButton = document.getElementById("main-screen-button-from-game");
+  const restartButtons = document.querySelectorAll(".restart-button");
   const backgroundMusic = document.getElementById("background-music");
   const playPauseButton = document.getElementById("play-pause-button");
   const volumeControl = document.getElementById("volume-control");
 
-  playPauseButton.addEventListener("click", function () {
-    if (backgroundMusic.paused) {
-      backgroundMusic.play();
-      playPauseButton.textContent = "Pause";
-    } else {
-      backgroundMusic.pause();
-      playPauseButton.textContent = "Play";
+  let activeGame = null;
+
+  const resultScreens = {
+    perfect: "game-win",
+    damaged: "game-win-but",
+    lose: "game-lose",
+  };
+
+  function showScreen(screenId) {
+    screens.forEach((screen, id) => {
+      screen.hidden = id !== screenId;
+    });
+  }
+
+  function stopGame() {
+    if (!activeGame) {
+      return;
     }
+
+    activeGame.destroy();
+    activeGame = null;
+  }
+
+  function startGame() {
+    stopGame();
+    activeGame = new Game({
+      onGameEnd: (result) => {
+        showScreen(resultScreens[result]);
+      },
+    });
+
+    showScreen("game-content");
+    activeGame.start();
+  }
+
+  playButton.addEventListener("click", startGame);
+
+  instructionsButtons.forEach((button) => {
+    button.addEventListener("click", () => showScreen("instructions"));
   });
 
-  volumeControl.addEventListener("input", function () {
-    backgroundMusic.volume = volumeControl.value;
+  creditsButtons.forEach((button) => {
+    button.addEventListener("click", () => showScreen("credits"));
   });
+
+  mainScreenButtons.forEach((button) => {
+    button.addEventListener("click", () => showScreen("main-menu"));
+  });
+
+  inGameMainMenuButton.addEventListener("click", () => {
+    stopGame();
+    showScreen("main-menu");
+  });
+
+  restartButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      stopGame();
+      showScreen("main-menu");
+    });
+  });
+
+  backgroundMusic.volume = Number(volumeControl.value);
+
+  playPauseButton.addEventListener("click", () => {
+    if (backgroundMusic.paused) {
+      backgroundMusic
+        .play()
+        .then(() => {
+          playPauseButton.textContent = "Pause Music";
+        })
+        .catch(() => {
+          playPauseButton.textContent = "Play Music";
+        });
+      return;
+    }
+
+    backgroundMusic.pause();
+    playPauseButton.textContent = "Play Music";
+  });
+
+  volumeControl.addEventListener("input", () => {
+    backgroundMusic.volume = Number(volumeControl.value);
+  });
+
+  showScreen("main-menu");
 });

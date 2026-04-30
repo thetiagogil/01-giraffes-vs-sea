@@ -1,215 +1,404 @@
+const GAME_WORLD = Object.freeze({
+  width: 1600,
+  height: 680,
+  damageLineX: 360,
+});
+
+const ENEMY_WAVES = Object.freeze([
+  {
+    type: "dolphin",
+    label: "Dolphin",
+    strength: 40,
+    width: 250,
+    height: 84,
+    speed: 180,
+    x: 1380,
+    y: 450,
+    image: "./img/dolphin.gif",
+  },
+  {
+    type: "shark",
+    label: "Shark",
+    strength: 50,
+    width: 280,
+    height: 94,
+    speed: 140,
+    x: 1400,
+    y: 400,
+    image: "./img/shark.gif",
+  },
+  {
+    type: "whale",
+    label: "Whale",
+    strength: 60,
+    width: 370,
+    height: 120,
+    speed: 100,
+    x: 1350,
+    y: 450,
+    image: "./img/whale.gif",
+  },
+  {
+    type: "kraken",
+    label: "Kraken",
+    strength: 150,
+    width: 430,
+    height: 210,
+    speed: 60,
+    x: 1275,
+    y: 400,
+    image: "./img/kraken.gif",
+  },
+]);
+
 class Game {
-  constructor() {
-    this.mainMenu = document.getElementById("main-menu");
-    this.gameContentScreen = document.getElementById("game-content");
-    this.gameLoseScreen = document.getElementById("game-lose");
-    this.gameWinScreen = document.getElementById("game-win");
-    this.gameWinButScreen = document.getElementById("game-win-but");
-    this.height = 600;
-    this.width = 1500;
-    this.animateId = 0;
-    this.gameWin = false;
-    this.gameWinBut = false;
-    this.gameLose = false;
-    this.enemyStartPosition = this.width - 200;
-    this.player = new Player(this.gameContentScreen, 200, 350, 30, 430);
-    this.dolphin = new Enemy(
-      this.gameContentScreen,
-      40,
-      60,
-      180,
-      1,
-      1,
-      this.enemyStartPosition,
-      460,
-      "./img/dolphin.gif",
-      true,
-      "dolphin"
-    );
-    this.dolphinRemoved = false;
-    this.sharkRemoved = false;
-    this.krakenRemoved = false;
-    this.enemies = [this.dolphin];
+  constructor({ onGameEnd }) {
+    this.onGameEnd = onGameEnd;
+    this.playfield = document.getElementById("playfield");
+    this.answerForm = document.getElementById("answer-form");
+    this.answerInput = document.getElementById("user-answer");
+    this.problemList = document.getElementById("active-problems");
+    this.hp = document.getElementById("hp");
+    this.waveStatus = document.getElementById("wave-status");
+
+    this.animationFrameId = 0;
+    this.lastFrameTime = 0;
+    this.nextWaveIndex = 0;
+    this.resolvedEnemies = 0;
+    this.state = "idle";
+    this.enemies = [];
+    this.player = null;
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.gameLoop = this.gameLoop.bind(this);
   }
 
-  // START THE GAME
   start() {
-    this.mainMenu.style.display = "none";
-    this.gameContentScreen.style.display = "block";
+    this.destroy();
+    this.state = "running";
+    this.player = new Player({
+      parentElement: this.playfield,
+      world: GAME_WORLD,
+    });
 
-    this.gameContentScreen.style.height = `${this.height}px`;
-    this.gameContentScreen.style.width = `${this.width}px`;
+    this.answerForm.addEventListener("submit", this.handleSubmit);
+    this.answerInput.disabled = false;
+    this.answerInput.value = "";
 
-    this.showEnemyMathProblem("dolphin");
+    this.spawnNextEnemy();
+    this.render();
 
-    this.gameLoop();
+    this.lastFrameTime = performance.now();
+    this.animationFrameId = requestAnimationFrame(this.gameLoop);
+    window.setTimeout(() => this.answerInput.focus(), 0);
   }
 
-  // USER ANSWER DISPLAY
-  createUserAnswerInput() {
-    const userAnswer = document.getElementById("user-answer");
-    return parseFloat(userAnswer.value);
+  destroy() {
+    cancelAnimationFrame(this.animationFrameId);
+    this.animationFrameId = 0;
+    this.lastFrameTime = 0;
+    this.nextWaveIndex = 0;
+    this.resolvedEnemies = 0;
+    this.state = "idle";
+
+    this.answerForm.removeEventListener("submit", this.handleSubmit);
+    this.answerForm.reset();
+    this.answerInput.disabled = true;
+
+    this.enemies.forEach((enemy) => enemy.destroy());
+    this.enemies = [];
+
+    if (this.player) {
+      this.player.destroy();
+      this.player = null;
+    }
+
+    this.problemList.replaceChildren();
+    this.hp.textContent = "100";
+    this.waveStatus.textContent = "Ready";
   }
 
-  // MATH DISPLAY
-  showEnemyMathProblem(enemyType) {
-    const enemy = this[enemyType];
-    const capitalLetterEnemyType =
-      enemyType.charAt(0).toUpperCase() + enemyType.slice(1);
-    let getProblemElement = document.getElementById(`${enemyType}-problem`);
-    let mathProblem = `${capitalLetterEnemyType}: ${enemy.xValue} ${enemy.operation} ${enemy.yValue}`;
-    getProblemElement.textContent = mathProblem;
-  }
+  gameLoop(currentTime) {
+    if (this.state !== "running") {
+      return;
+    }
 
-  // REMOVE MATH DISPLAY
-  removeEnemyMathProblem(enemyType) {
-    const getProblemElement = document.getElementById(`${enemyType}-problem`);
-    getProblemElement.remove();
-    const userAnswer = document.getElementById("user-answer");
-    userAnswer.value = "";
-  }
+    const deltaSeconds = Math.min(
+      (currentTime - this.lastFrameTime) / 1000,
+      0.05,
+    );
+    this.lastFrameTime = currentTime;
 
-  // REMOVE THE ENEMIES BY MATH TYPE - DID THIS FUNCTION TO CUT SOME LINES OFF THE CODE
-  removeEnemiesByType(enemyType) {
-    switch (enemyType) {
-      case "dolphin":
-        this.dolphinRemoved = true;
-        this.removeEnemyMathProblem("dolphin");
-        break;
-      case "shark":
-        this.sharkRemoved = true;
-        this.removeEnemyMathProblem("shark");
-        break;
-      case "whale":
-        this.whaleRemoved = true;
-        this.removeEnemyMathProblem("whale");
-        break;
-      case "kraken":
-        this.krakenRemoved = true;
-        break;
-      default:
-        break;
+    this.update(deltaSeconds);
+    this.render();
+
+    if (this.state === "running") {
+      this.animationFrameId = requestAnimationFrame(this.gameLoop);
     }
   }
 
-  // UPDATE or GAMEPLAY - HERE THE ENEMIES START MOVING IN A DEFINED ORDER AND GET ELIMINATED
-  update() {
-    const userAnswer = this.createUserAnswerInput();
+  update(deltaSeconds) {
+    this.enemies.forEach((enemy) => enemy.move(deltaSeconds));
 
-    for (let i = 0; i < this.enemies.length; i += 1) {
-      const enemy = this.enemies[i];
-      enemy.move();
-
-      if (userAnswer === enemy.correctAnswer) {
-        enemy.element.remove();
-        this.removeEnemiesByType(enemy.mathType);
-        this.enemies.splice(i, 1);
-      } else if (enemy.left <= 360 && !enemy.hasDamagedPlayer) {
-        this.player.health -= enemy.strength;
-        enemy.hasDamagedPlayer = true;
-        enemy.element.remove();
-        this.removeEnemiesByType(enemy.mathType);
-        this.enemies.splice(i, 1);
-        i -= 1;
+    [...this.enemies].forEach((enemy) => {
+      if (enemy.hasReachedShip(GAME_WORLD.damageLineX)) {
+        this.handleEnemyReachedShip(enemy);
       }
+    });
+
+    if (!this.player || this.player.health <= 0) {
+      this.finish("lose");
+      return;
     }
 
-    // SPAWN SHARK
+    this.maybeSpawnNextEnemy();
+    this.finishIfComplete();
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    if (this.state !== "running") {
+      return;
+    }
+
+    const rawAnswer = this.answerInput.value.trim();
+
+    if (rawAnswer === "") {
+      this.answerInput.focus();
+      return;
+    }
+
+    const answer = Number(rawAnswer);
+
+    if (!Number.isFinite(answer)) {
+      this.answerInput.select();
+      return;
+    }
+
+    const target = this.enemies.find((enemy) => enemy.correctAnswer === answer);
+
+    if (!target) {
+      this.answerInput.select();
+      return;
+    }
+
+    this.removeEnemy(target);
+    this.answerInput.value = "";
+    this.answerInput.focus();
+
+    this.maybeSpawnNextEnemy();
+    this.finishIfComplete();
+    this.render();
+  }
+
+  spawnNextEnemy() {
+    if (this.nextWaveIndex >= ENEMY_WAVES.length) {
+      return;
+    }
+
+    const enemyConfig = ENEMY_WAVES[this.nextWaveIndex];
+    const enemy = new Enemy({
+      ...enemyConfig,
+      id: `${enemyConfig.type}-${this.nextWaveIndex}`,
+      parentElement: this.playfield,
+      world: GAME_WORLD,
+      problem: createProblem(enemyConfig.type),
+    });
+
+    this.enemies.push(enemy);
+    this.nextWaveIndex += 1;
+  }
+
+  maybeSpawnNextEnemy() {
+    if (this.nextWaveIndex >= ENEMY_WAVES.length) {
+      return;
+    }
+
+    if (this.enemies.length >= 2) {
+      return;
+    }
+
+    const nextEnemy = ENEMY_WAVES[this.nextWaveIndex];
+
+    if (nextEnemy.type === "kraken") {
+      if (this.enemies.length === 0) {
+        this.spawnNextEnemy();
+      }
+
+      return;
+    }
+
+    const newestEnemy = this.enemies[this.enemies.length - 1];
+    const shouldSpawn =
+      this.enemies.length === 0 || newestEnemy.x <= GAME_WORLD.width * 0.62;
+
+    if (shouldSpawn) {
+      this.spawnNextEnemy();
+    }
+  }
+
+  handleEnemyReachedShip(enemy) {
+    if (!this.player) {
+      return;
+    }
+
+    this.player.takeDamage(enemy.strength);
+    this.showDamageSplash(enemy.strength);
+    this.removeEnemy(enemy);
+  }
+
+  showDamageSplash(amount) {
+    if (!this.player) {
+      return;
+    }
+
+    const splash = document.createElement("div");
+    splash.className = "damage-splash";
+    splash.textContent = `-${amount}`;
+    splash.style.left = `${
+      ((this.player.x + this.player.width * 0.64) / GAME_WORLD.width) * 100
+    }%`;
+    splash.style.top = `${
+      ((this.player.y - this.player.height * 0.18) / GAME_WORLD.height) * 100
+    }%`;
+
+    splash.addEventListener(
+      "animationend",
+      () => {
+        splash.remove();
+      },
+      { once: true },
+    );
+
+    this.playfield.appendChild(splash);
+  }
+
+  removeEnemy(enemyToRemove) {
+    const enemyIndex = this.enemies.findIndex(
+      (enemy) => enemy.id === enemyToRemove.id,
+    );
+
+    if (enemyIndex === -1) {
+      return;
+    }
+
+    const [enemy] = this.enemies.splice(enemyIndex, 1);
+    enemy.destroy();
+    this.resolvedEnemies += 1;
+  }
+
+  finishIfComplete() {
     if (
-      !this.sharkSpawned &&
-      (this.dolphinRemoved || this.dolphin.left <= this.width / 2)
+      this.nextWaveIndex < ENEMY_WAVES.length ||
+      this.enemies.length > 0 ||
+      !this.player
     ) {
-      this.shark = new Enemy(
-        this.gameContentScreen,
-        60,
-        60,
-        180,
-        1 / 1.7,
-        1,
-        this.enemyStartPosition,
-        430,
-        "./img/shark.gif",
-        true,
-        "shark"
-      );
-      this.enemies.push(this.shark);
-      this.sharkSpawned = true;
-      this.showEnemyMathProblem("shark");
+      return;
     }
 
-    // SPAWN WHALE
-    if (
-      !this.whaleSpawned &&
-      this.shark &&
-      (this.sharkRemoved || this.shark.left <= this.width / 2)
-    ) {
-      this.whale = new Enemy(
-        this.gameContentScreen,
-        90,
-        80,
-        230,
-        1 / 2,
-        1,
-        this.enemyStartPosition,
-        490,
-        "./img/whale.gif",
-        true,
-        "whale"
-      );
-      this.enemies.push(this.whale);
-      this.whaleSpawned = true;
-      this.showEnemyMathProblem("whale");
+    this.finish(
+      this.player.health === this.player.maxHealth ? "perfect" : "damaged",
+    );
+  }
+
+  finish(result) {
+    if (this.state !== "running") {
+      return;
     }
 
-    // SPAWN KRAKEN
+    this.state = "finished";
+    cancelAnimationFrame(this.animationFrameId);
+    this.answerInput.disabled = true;
+    this.onGameEnd(result);
+  }
+
+  render() {
+    if (!this.player) {
+      return;
+    }
+
+    this.hp.textContent = String(this.player.health);
+    this.waveStatus.textContent = `${this.resolvedEnemies} / ${ENEMY_WAVES.length} cleared`;
+    this.renderProblems();
+  }
+
+  renderProblems() {
     if (this.enemies.length === 0) {
-      this.kraken = new Enemy(
-        this.gameContentScreen,
-        100,
-        150,
-        300,
-        1 / 4, // should be 6
-        2,
-        this.enemyStartPosition - 150,
-        450,
-        "./img/kraken.gif",
-        true,
-        "kraken"
+      const emptyMessage = document.createElement("p");
+      emptyMessage.className = "problem-empty";
+      emptyMessage.textContent = "No active enemies.";
+      this.problemList.replaceChildren(emptyMessage);
+      return;
+    }
+
+    const problemRows = this.enemies.map((enemy) => {
+      const row = document.createElement("div");
+      row.className = "problem-row";
+
+      const label = document.createElement("span");
+      label.className = "problem-row__label";
+      label.textContent = enemy.label;
+
+      const problem = document.createElement("span");
+      problem.className = "problem-row__problem";
+      problem.textContent = enemy.getProblemText();
+
+      const damage = document.createElement("span");
+      damage.className = "problem-row__damage";
+      damage.textContent = `${enemy.strength} dmg`;
+
+      row.replaceChildren(label, problem, damage);
+      return row;
+    });
+
+    this.problemList.replaceChildren(...problemRows);
+  }
+}
+
+function createProblem(enemyType) {
+  switch (enemyType) {
+    case "dolphin":
+      return createAdditionProblem(randomInt(10, 98), randomInt(6, 9));
+    case "shark":
+      return createAdditionProblem(randomInt(10, 98), randomInt(10, 98));
+    case "whale":
+      return createMultiplicationProblem(
+        randomMultipleOfFive(10, 95),
+        randomInt(3, 5),
       );
-      this.enemies.push(this.kraken);
-      this.showEnemyMathProblem("kraken");
-    }
+    case "kraken":
+      return createAdditionProblem(randomInt(100, 998), randomInt(100, 998));
+    default:
+      return createAdditionProblem(0, 0);
   }
+}
 
-  // GAME LOOP - SO THE GAME CAN FINISH AND RESTART
-  gameLoop() {
-    this.update();
+function createAdditionProblem(left, right) {
+  return {
+    left,
+    right,
+    operation: "+",
+    answer: left + right,
+  };
+}
 
-    document.getElementById("hp").innerText = this.player.health;
+function createMultiplicationProblem(left, right) {
+  return {
+    left,
+    right,
+    operation: "x",
+    answer: left * right,
+  };
+}
 
-    if (this.kraken && this.krakenRemoved && this.player.health === 100) {
-      this.gameWin = true;
-    }
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-    if (this.kraken && this.krakenRemoved && this.player.health > 0 && this.player.health < 100) {
-      this.gameWinBut = true;
-    }
+function randomMultipleOfFive(min, max) {
+  const minStep = Math.ceil(min / 5);
+  const maxStep = Math.floor(max / 5);
 
-    if (this.player.health <= 0) {
-      this.gameLose = true;
-    }
-
-    if (this.gameWin) {
-      this.gameContentScreen.style.display = "none";
-      this.gameWinScreen.style.display = "block";
-    } else if (this.gameWinBut) {
-      this.gameContentScreen.style.display = "none";
-      this.gameWinButScreen.style.display = "block";
-    } else if (this.gameLose) {
-      this.gameContentScreen.style.display = "none";
-      this.gameLoseScreen.style.display = "block";
-    } else {
-      this.animateId = requestAnimationFrame(() => this.gameLoop());
-    }
-  }
+  return randomInt(minStep, maxStep) * 5;
 }
