@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Giraffes vs Sea favicon concept">
+  <circle cx="32" cy="32" r="30" fill="#1a1d23"/>
+  <g id="mark" transform="translate(0 0)">
+    <g id="g-letter" transform="translate(-1 -1)">
+      <path d="M43 24c-2.5-4-7.6-6-12.5-4.8C23.2 21 19 28.3 21.3 35.1c2.4 7.1 10 10.3 16.5 7.2 3.2-1.5 5.4-3.9 6.2-7H33" fill="none" stroke="#f6c453" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="wave" transform="translate(-3 -2)">
+      <path d="M21 48c3-3 6-3 9 0s6 3 9 0 6-3 9 0" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
