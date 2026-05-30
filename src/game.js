@@ -67,6 +67,7 @@ class Game {
     this.resolvedEnemies = 0;
     this.state = "idle";
     this.enemies = [];
+    this.damageSplashes = new Set();
     this.player = null;
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -107,6 +108,9 @@ class Game {
 
     this.enemies.forEach((enemy) => enemy.destroy());
     this.enemies = [];
+
+    this.damageSplashes.forEach((splash) => splash.remove());
+    this.damageSplashes.clear();
 
     if (this.player) {
       this.player.destroy();
@@ -263,13 +267,14 @@ class Game {
       ((this.player.y - this.player.height * 0.18) / GAME_WORLD.height) * 100
     }%`;
 
-    splash.addEventListener(
-      "animationend",
-      () => {
-        splash.remove();
-      },
-      { once: true },
-    );
+    this.damageSplashes.add(splash);
+
+    const removeSplash = () => {
+      this.damageSplashes.delete(splash);
+      splash.remove();
+    };
+
+    splash.addEventListener("animationend", removeSplash, { once: true });
 
     this.playfield.appendChild(splash);
   }
